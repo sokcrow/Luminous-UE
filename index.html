@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escáner de Códigos</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 16px; background: #f4f4f5; color: #18181b; }
+    h1 { font-size: 1.25rem; margin-top: 0; margin-bottom: 12px; text-align: center; }
+    #reader { width: 100%; border-radius: 12px; overflow: hidden; background: #000; }
+    .list { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+    .card { padding: 12px 14px; border-radius: 10px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; border-left: 6px solid #e4e4e7; transition: background 0.2s; }
+    .card.yellow { background-color: #fef9c3; border-left-color: #eab308; }
+    .card.orange { background-color: #ffedd5; border-left-color: #f97316; }
+    .code { font-weight: bold; font-family: monospace; font-size: 1.1rem; }
+    .time { font-size: 0.75rem; color: #71717a; display: block; margin-top: 2px; }
+    .actions { display: flex; gap: 6px; }
+    .btn { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+    .btn-yellow { background: #eab308; color: #fff; }
+    .btn-orange { background: #f97316; color: #fff; }
+    .btn-clear { background: #ef4444; color: #fff; margin-top: 16px; width: 100%; padding: 12px; font-size: 1rem; }
+  </style>
+</head>
+<body>
+
+  <h1>Escáner & Marcador</h1>
+  <div id="reader"></div>
+
+  <div class="list" id="scanned-list"></div>
+  <button class="btn btn-clear" onclick="clearList()">Borrar Todos los Códigos</button>
+
+  <script>
+    let items = JSON.parse(localStorage.getItem('scanned_barcodes') || '[]');
+
+    function renderList() {
+      const container = document.getElementById('scanned-list');
+      container.innerHTML = '';
+      items.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = `card ${item.color || ''}`;
+        div.innerHTML = `
+          <div>
+            <div class="code">${item.code}</div>
+            <span class="time">${new Date(item.time).toLocaleTimeString()}</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-yellow" onclick="setColor(${index}, 'yellow')">Amarillo</button>
+            <button class="btn btn-orange" onclick="setColor(${index}, 'orange')">Naranja</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function setColor(index, color) {
+      items[index].color = items[index].color === color ? '' : color;
+      localStorage.setItem('scanned_barcodes', JSON.stringify(items));
+      renderList();
+    }
+
+    function clearList() {
+      if (confirm('¿Seguro que deseas borrar la lista?')) {
+        items = [];
+        localStorage.removeItem('scanned_barcodes');
+        renderList();
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      if (!items.some(i => i.code === decodedText)) {
+        items.unshift({ code: decodedText, time: Date.now(), color: '' });
+        localStorage.setItem('scanned_barcodes', JSON.stringify(items));
+        renderList();
+      }
+    }
+
+    const html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+      fps: 10, 
+      qrbox: { width: 250, height: 150 },
+      rememberLastUsedCamera: true
+    });
+    html5QrcodeScanner.render(onScanSuccess);
+
+    renderList();
+  </script>
+</body>
+</html>
