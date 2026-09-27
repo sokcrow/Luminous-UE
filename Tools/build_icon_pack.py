@@ -174,6 +174,42 @@ the Unreal Editor and should not replace the original PNG/SVG sources.
             if p.is_file():
                 z.write(p, p.relative_to(PACK.parent).as_posix())
 
+    # Split archives keep original bytes untouched while staying below connector limits.
+    split_rules = {
+        "Consumables": ["Assets/Icons/items/consumable/"],
+        "Equipment": ["Assets/Icons/items/equipment/"],
+        "Materials": ["Assets/Icons/items/material/"],
+        "Utility_Resources_UI": [
+            "Assets/Icons/items/utility/",
+            "Assets/Icons/items/resource/",
+            "Assets/Icons/items/fallback/",
+            "Assets/Images/Buttons/",
+            "Assets/Images/Weather/",
+        ],
+    }
+    split_archives = {}
+    for label, prefixes in split_rules.items():
+        out_zip = OUT / f"Luminous_Iconography_{label}.zip"
+        if out_zip.exists():
+            out_zip.unlink()
+        with zipfile.ZipFile(out_zip, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as z:
+            # Include catalog and mapping context in every split pack.
+            for p in sorted((PACK / "Catalog").rglob("*")):
+                if p.is_file():
+                    z.write(p, p.relative_to(PACK.parent).as_posix())
+            for p in sorted((PACK / "RegistrySource").rglob("*")):
+                if p.is_file():
+                    z.write(p, p.relative_to(PACK.parent).as_posix())
+            z.write(PACK / "README_IMPORT_UE.txt", (PACK / "README_IMPORT_UE.txt").relative_to(PACK.parent).as_posix())
+            for row in rows:
+                if any(row["path"].startswith(prefix) for prefix in prefixes):
+                    p = PACK / row["path"]
+                    z.write(p, p.relative_to(PACK.parent).as_posix())
+        split_archives[label] = {
+            "path": str(out_zip),
+            "bytes": out_zip.stat().st_size,
+        }
+
     print(json.dumps({
         "zip": str(zip_path),
         "files": len(rows),
@@ -181,6 +217,7 @@ the Unreal Editor and should not replace the original PNG/SVG sources.
         "bytes": total_bytes,
         "zip_bytes": zip_path.stat().st_size,
         "families": dict(sorted(family_counts.items())),
+        "split_archives": split_archives,
     }))
 
 if __name__ == "__main__":
