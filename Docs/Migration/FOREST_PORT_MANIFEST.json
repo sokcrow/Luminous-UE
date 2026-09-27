@@ -1,0 +1,97 @@
+{
+  "source": {
+    "repository": "sokcrow/Luminos-Character-Maker",
+    "branch": "lab-preview-next",
+    "forestHost": "game-engine/lab/game/forest-0.3.3.1.html",
+    "measured": {
+      "bytesApprox": 1225100,
+      "lines": 20650,
+      "namedInlineFunctions": 998
+    }
+  },
+  "rules": [
+    {
+      "source": "game-engine/src/world/WorldSpaceContract.js",
+      "action": "PORT_RULE",
+      "target": "LuminousWorldUnits"
+    },
+    {
+      "source": "game-engine/src/world/TerrainMobility.js",
+      "action": "PORT_RULE",
+      "target": "LuminousTerrainRules"
+    },
+    {
+      "source": "game-engine/src/world/CombatGeometry.js",
+      "action": "PORT_RULE",
+      "target": "LuminousCombatGeometry"
+    },
+    {
+      "source": "game-engine/src/world/ContinuousMovement.js",
+      "action": "PORT_RULE",
+      "target": "LuminousMovementBudget"
+    },
+    {
+      "source": "game-engine/src/map/procedural/SeededRandom.js",
+      "action": "PORT_RULE",
+      "target": "LuminousDeterminism"
+    },
+    {
+      "source": "inline:UNIVERSAL UNIT RUNTIME v3",
+      "action": "PORT_CONTRACT",
+      "target": "ALuminousUnit + Unit systems"
+    },
+    {
+      "source": "inline:WORLD INTERACTION CONTROLLER v1",
+      "action": "PORT_CONTRACT",
+      "target": "ULuminousInteractionSubsystem"
+    },
+    {
+      "source": "inline:GRID AUTORITATIVO",
+      "action": "PORT_CONTRACT",
+      "target": "ULuminousWorldQuerySubsystem + tactical grid"
+    },
+    {
+      "source": "inline:STABLE RIVER MODULE CONTRACT v1",
+      "action": "PORT_CONTRACT",
+      "target": "ULuminousWaterSubsystem"
+    },
+    {
+      "source": "game-engine/src/world/WaterBodySystem.js",
+      "action": "REBUILD_PRESENTATION",
+      "target": "Unreal Water + materials"
+    },
+    {
+      "source": "game-engine/src/world/WakeTrailSystem.js",
+      "action": "REBUILD_PRESENTATION",
+      "target": "Niagara/material effects"
+    },
+    {
+      "source": "inline:PAPERFX v1",
+      "action": "REBUILD_PRESENTATION",
+      "target": "Unreal Materials/Niagara"
+    },
+    {
+      "source": "inline:FOREST CAMERA STREAMING",
+      "action": "RETIRE_WEB",
+      "target": "World Partition/HLOD/ISM/HISM"
+    },
+    {
+      "source": "game-engine/src/ui/HudDomAdapter.js",
+      "action": "RETIRE_WEB",
+      "target": "UMG"
+    }
+  ],
+  "extractionOrder": [
+    "WorldUnits",
+    "UniversalUnitContract",
+    "TerrainRules",
+    "CombatGeometry",
+    "InteractionContract",
+    "WorldQueryContract",
+    "WaterGameplayContract",
+    "WorldTimeRest",
+    "MapRuntime",
+    "ProceduralData",
+    "UnrealNativeImplementation"
+  ]
+}

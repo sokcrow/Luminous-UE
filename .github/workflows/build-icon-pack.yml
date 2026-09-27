@@ -1,0 +1,93 @@
+name: Build Luminous Iconography Pack
+
+on:
+  pull_request:
+    paths:
+      - "Tools/build_icon_pack.py"
+      - ".github/workflows/build-icon-pack.yml"
+  workflow_dispatch:
+
+jobs:
+  build-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Luminous UE
+        uses: actions/checkout@v4
+
+      - name: Checkout current Luminous main assets
+        uses: actions/checkout@v4
+        with:
+          repository: sokcrow/Luminos-Character-Maker
+          ref: main
+          path: source
+          fetch-depth: 1
+
+      - name: Record exact source commit
+        shell: bash
+        run: git -C source rev-parse HEAD > source/.source_commit
+
+      - name: Build catalogued icon pack
+        run: python Tools/build_icon_pack.py source dist
+
+      - name: Pack summary
+        shell: bash
+        run: |
+          du -h dist/Luminous_Iconography_Main.zip
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path("dist/Luminous_Iconography_Main/Catalog/icon_manifest.json").read_text())
+          print("files:",m["total_files"])
+          print("registered:",m["registered_item_icons"])
+          print("families:",m["families"])
+          PY
+
+      - name: Upload iconography ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Luminous_Iconography_Main
+          path: dist/Luminous_Iconography_Main.zip
+          compression-level: 0
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload split consumables
+        uses: actions/upload-artifact@v4
+        with:
+          name: Luminous_Iconography_Consumables
+          path: dist/Luminous_Iconography_Consumables.zip
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload split equipment
+        uses: actions/upload-artifact@v4
+        with:
+          name: Luminous_Iconography_Equipment
+          path: dist/Luminous_Iconography_Equipment.zip
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload split materials
+        uses: actions/upload-artifact@v4
+        with:
+          name: Luminous_Iconography_Materials
+          path: dist/Luminous_Iconography_Materials.zip
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload split utility resources UI
+        uses: actions/upload-artifact@v4
+        with:
+          name: Luminous_Iconography_Utility_Resources_UI
+          path: dist/Luminous_Iconography_Utility_Resources_UI.zip
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload catalog only
+        uses: actions/upload-artifact@v4
+        with:
+          name: Luminous_Iconography_Catalog
+          path: |
+            dist/Luminous_Iconography_Main/Catalog/
+            dist/Luminous_Iconography_Main/README_IMPORT_UE.txt
+          retention-days: 90
