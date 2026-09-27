@@ -1,0 +1,26 @@
+# Unreal Engine generated
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.vscode/
+.idea/
+
+# Build products
+*.VC.db
+*.opensdf
+*.sdf
+*.sln
+*.suo
+*.xcodeproj
+*.xcworkspace
+
+# User-local
+*.user
+*.userprefs
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Do NOT ignore Content/*.uasset or Content/*.umap: project assets belong in source control.
